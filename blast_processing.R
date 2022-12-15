@@ -3,13 +3,15 @@ library(ggplot2)
 
 options(stringsAsFactors = FALSE)
 
-# x <- "all_medaka_fastas_barcode03_concatenated_fasta_out.tsv"
+# x <- "sample_blast_out.tsv"
 
 # Read in the data
 read_summary <- function(x) {
     dat <- read.table(x, sep = "\t", header = FALSE)
     dat <- dat[, c(1:8)]
     names(dat) <- c("id", "piden", "qlen", "mismat", "gap", "eval", "bits", "metad")
+    index <- match(unique(dat$id), dat$id)
+    dat <- dat[index,]
     dat$metad <- sub(" ", "_", dat$metad)
 
     # Cleans and extracts gensp, cluster size, target

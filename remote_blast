@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -eu
+start=$SECONDS
+seq=1
+
+READY="no"
+VERSIONnr=0.0.1
+
+usage() {
+  echo "Usage: $0
+  -h    help
+  -v    version
+BLAST-ing:
+  -g    BLASTs everything; You need to add '-g yes' to confirm you want to do this
+  -s    number of target sequences to return; default is 1
+ "  1>&2
+}
+
+exit_abnormal() {
+  usage
+  exit 1
+}
+
+# Returns help screen if no arguments are entered
+[[ $@ ]] || { usage; exit 1; }
+
+while getopts "hvg:s:" options; do
+  case "${options}" in
+    h)
+      usage
+      exit 1
+      ;;
+    v)
+      echo "This is remote_blast $VERSIONnr"
+      exit 1
+      ;;
+	  g)
+      READY=${OPTARG}
+      if ! [[ $READY == "yes" ]] ; then
+	    echo "You need to add '-g yes' to confirm you want to do this"
+      exit 1
+      fi
+	    ;;
+    s)
+      seq=${OPTARG}
+      ;;
+    *)
+      exit_abnormal
+      ;;
+  esac
+done
+
+# Stores all of the .fasta files in current wd
+var=$(ls | grep ".*\.fasta$")
+
+# Loops through list of .fastas files and blasts each one
+# The outputs will be stored as .tsv file
+for i in $var; do
+  x=$i
+  y=${x%.fasta}
+	blastn -query $i -db nt -remote -outfmt "6 qseqid pident length mismatch gapopen evalue bitscore salltitles sallseqid" -max_target_seqs $seq >${y}_out.tsv
+done
+
+# Summarizes the BLAST results 
+# Generates viz and summary of seq number per unique organism
+Rscript blast_processing.R
+
+# Times the whole process; could be worth knowing???
+end=$SECONDS
+duration=$(( end - start ))
+
+# Politely tells you when it is done
+echo "Remote BLAST has completed"
+echo "BLAST results took $duration to process"
+echo "Team Rocket is BLAST-ing off again"
+
