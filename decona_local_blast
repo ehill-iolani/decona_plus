@@ -1,0 +1,120 @@
+#!/bin/bash
+
+set -eu
+start=$SECONDS
+seq=1
+
+VERSIONnr=0.0.1
+MULTITHREAD=4
+integer=^[0-9]+$
+LENGTH=300
+READY="no"
+BLASTDB=no
+BLASTdir=no
+
+usage() {
+  echo "Usage: $0
+  -h    help
+  -v    version
+BLAST-ing:
+  -B    yourblastdatabase.fasta
+  -s    number of target sequences to return; default is 1
+  -T    multithreading default 4
+  -g    BLASTs everything; You need to add '-g yes' to confirm you want to do this
+ "  1>&2
+}
+
+exit_abnormal() {
+  usage
+  exit 1
+}
+
+# Returns help screen if no arguments are entered
+[[ $@ ]] || { usage; exit 1; }
+
+while getopts "hvB:s:T:g:" options; do
+  case "${options}" in
+    h)
+      usage
+      exit 1
+      ;;
+    v)
+      echo "This is decona_local_blast $VERSIONnr"
+      exit 1
+      ;;
+    g)
+      READY=${OPTARG}
+      if ! [[ $READY == "yes" ]] ; then
+	    echo "You need to add '-g yes' to confirm you want to do this"
+        exit 1
+      fi
+      ;;
+    B)
+      BLASTDB=${OPTARG}
+      if ! [[ $BLASTDB = *.fasta ]] ; then
+        echo "-B: to create your BLAST database input files should be in .fasta format"
+        exit 1
+      fi
+      ;;
+    s)
+      seq=${OPTARG}
+      ;;
+    T)
+      MULTITHREAD=${OPTARG}
+      if ! [[ $LENGTH =~ $integer ]] ; then
+        echo "Error: Multithread -T must be a positive, whole number."
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+if ! [[ $READY == "yes" ]] ; then
+echo " "
+echo "You need to add '-g yes' to confirm you want to do this"
+echo " "
+exit_abnormal
+fi
+
+if ! [[ $BLASTDB = "no" ]] ; then
+  [ -d BLASTdatabase ] || mkdir BLASTdatabase
+  (
+    mv "$BLASTDB" BLASTdatabase
+    cd BLASTdatabase ;
+    makeblastdb -in $BLASTDB -dbtype nucl -parse_seqids ;
+    pwd > BlastDBlocation;
+  )
+BLASTdir=$(<BLASTdatabase/BlastDBlocation)/$BLASTDB
+echo "new blast database created in:  $BLASTdir"; else
+echo " "
+echo "please specify your .fasta to generate the BLAST database"
+echo " "
+exit_abnormal
+fi
+
+var=$(ls | grep ".*\.fasta$")
+
+
+if  [ -f $BLASTdir ] || [ -f $BLASTdir.fasta ] || [ -f $BLASTdir.nsi ] || [ -f $BLASTdir.nin ] || [ -f $BLASTdir.fasta.nsi ] || [ -f $BLASTdir.fasta.nin ]; then
+    for i in $var; do
+        x=$i
+        y=${x%.fasta}
+	        blastn -query $i -db "$BLASTdir" -outfmt "6 qseqid pident length mismatch gapopen evalue bitscore salltitles sallseqid" -max_hsps 500 -num_threads "$MULTITHREAD" -max_target_seqs $seq >${y}_out.tsv
+    done
+fi
+
+# Summarizes the BLAST results 
+# Generates viz and summary of seq number per unique organism
+Rscript /bin/blast_processing.R
+
+# Times the whole process; could be worth knowing???
+end=$SECONDS
+duration=$(( end - start ))
+
+# Politely tells you when it is done
+if [[ $BLASTDB = "no" ]] ; then
+echo " " ; else
+echo "Local BLAST has completed"
+echo "BLAST results took $duration seconds to process"
+echo "Team Rocket is BLAST-ing off again"
+fi
