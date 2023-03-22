@@ -69,3 +69,17 @@ decona_remote_pro -f -l 170 -m 300 -q 10 -c 0.95 -n 5 -M -k 10 -T 32
 ```
 decona_remote_blast -g yes
 ```
+
+## Decona_local_blast
+
+-Standalone BLAST tool that can re-BLAST results generated from ANY of the Decona pipelines 
+
+-BLAST against a local database generated from a .fasta file
+
+-Automatically generates results summary at the end of the BLAST search
+
+### Example Decona_remote_blast command:
+
+```
+decona_local_blast -B my_db.fasta -T 8 -g yes 
+```
