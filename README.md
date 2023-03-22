@@ -1,5 +1,5 @@
 # Decona_plus
-Decona_plus contains 3 modified pipelines based on Decona (Oosterbroek et al., preprint; https://github.com/Saskia-Oosterbroek/decona) and 1 standalone executable file for classifying ONT amplicon sequence data. These different pipelines and executables are intended to be used based on the research question you are trying to investigate.
+Decona_plus contains 3 modified pipelines based on Decona (Oosterbroek et al., preprint; https://github.com/Saskia-Oosterbroek/decona) and 2 standalone executable file for classifying ONT amplicon sequence data. These different pipelines and executables are intended to be used based on the research question you are trying to investigate.
 
 This pipeline has been containerized and is available here:
 ```
