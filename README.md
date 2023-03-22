@@ -54,7 +54,7 @@ decona_pro -f -l 170 -m 300 -q 10 -c 0.95 -n 5 -M -k 10 -T 32 -B db.fasta
 decona_remote_pro -f -l 170 -m 300 -q 10 -c 0.95 -n 5 -M -k 10 -T 32
 ```
 
-# Standalone remote BLAST for Decona
+# Standalone BLAST for Decona
 
 ## Decona_remote_blast
 
