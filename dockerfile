@@ -35,10 +35,10 @@ RUN mkdir /home/github && \
 RUN sed -i -e "s/\r$//" /home/github/decona/install/install.sh
 RUN bash /home/github/decona/install/install.sh
 SHELL ["conda", "run", "-n", "decona", "/bin/bash", "-c"]
-RUN conda install -c "bioconda/label/cf201901" blast
 
 # Install decona_plus
 RUN conda init && \
+    RUN conda install -y -c bioconda blast=2.11.0 && \
     conda install -y pandas=1.4.1 && \
     cd /home/github/  && \
     git clone https://github.com/ehill-iolani/decona_plus.git  && \
