@@ -38,7 +38,7 @@ SHELL ["conda", "run", "-n", "decona", "/bin/bash", "-c"]
 
 # Install decona_plus
 RUN conda init && \
-    RUN conda install -y -c bioconda blast=2.11.0 && \
+    conda install -y -c bioconda blast=2.11.0 && \
     conda install -y pandas=1.4.1 && \
     cd /home/github/  && \
     git clone https://github.com/ehill-iolani/decona_plus.git  && \
